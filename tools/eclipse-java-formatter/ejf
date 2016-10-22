@@ -21,12 +21,16 @@ lib_classpath="$(find "$d/lib/" -name '*.jar' | tr '\n' ':')"
 src="$d/src/ejf/Main.java"
 bin="$d/bin"
 cls="$d/bin/ejf/Main.class"
-if [ "$src" -nt "$cls" ] ; then
+if [ ! -f "$cls" -o "$src" -nt "$cls" ] ; then
   echo "Recompiling $src ..."
   javac -cp "$lib_classpath" -d "$bin" "$src"
   touch -r "$src" "$cls"
 fi
 
 style="$(find "$d/lib/" -name '*.xml' | head -n 1)"
+
+# search for a file called custom-autoformat-java.xml to override the default GoogleStyle
+customstyle="$(find "$d/../../../" -name 'custom-autoformat-java.xml' | head -n 1)"
+test -e "$customstyle" && style="${customstyle}"
 
 java -cp "$lib_classpath:$bin" ejf.Main "$style" "$@"
